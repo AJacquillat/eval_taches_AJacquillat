@@ -1,0 +1,159 @@
+Note sur les positions: tout est compté comme si c'était une chaine de caractère. Donc pas de position en 2D mais à une dimension. 
+
+    Ifstring: pour lire un fichier 
+getline(ifstream_objet, string_objet)   //donne tout le texte sur la ligne pointée par le pointeur 
+ifile.tellg()     ::tellg(et) position ie celle où l'on écrit 
+file.seekg( an_int )      //met le cxurseur de lecture à cette position 
+
+
+
+
+
+    Ofstring: pour écrire dans un fichier 
+ofile.tellp()    //tellp(ut) position ie nous dit où l'on écrit (put)
+ofile.seekp( an_int , éventuellent ios::beg pour partir du début, ios::end; ios::cur)  //déplace le curseur d'écriture 
+/!\: on insère pas mais on écrase donc pour l'état d'avancement, écrire 000%, 099%, 100% /// pour la priorité 1,2,3 ou H,M,L (high, medium, low)
+
+
+
+
+
+/!\ finir par un retour à la ligna fait bugger
+
+le retour à la ligne compte pour deux caractères ('\n')
+L'espace compte pour un caractère 
+
+
+
+
+////////////////////////////////////////////////////////
+//  Le code suivant compile & fonctionne, bon exemple //
+////////////////////////////////////////////////////////
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
+using namespace std;
+
+int main()
+{   
+
+    ifstream infile("test.txt", ios::app);
+    ofstream outfile ("test.txt", ios::app);
+
+
+    infile.seekg(0, ios::beg);
+    while(!infile.eof())
+    {
+        string ligne;
+        getline(infile, ligne);
+        cout<<ligne<<endl;
+    }
+
+    // get size of file
+    infile.seekg(0,infile.end);
+    int size = infile.tellg();
+    infile.seekg (0);
+
+    cout<<size;
+
+    outfile.close();
+    infile.close();
+    return 0;
+}
+
+///////////////////////////////////
+Il permet d'écrire dans un fichier préécrit sans tout écraser dès l'ouverture.
+E, revanhce, on ne eput pas réécrire sur les endroits avant k'ouverture..... solution plus tard
+////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////
+//// Eventuellement utile ///////////
+/////////////////////////////////////
+This example writes to a file everything the user types until a dot (.) is typed.
+/////////////////////////////////////
+
+
+// typewriter
+#include <iostream>     // std::cin, std::cout
+#include <fstream>      // std::ofstream
+
+int main () {
+  std::ofstream outfile ("test.txt");
+  char ch;
+
+  std::cout << "Type some text (type a dot to finish):\n";
+  do {
+    ch = std::cin.get();
+    outfile.put(ch);
+  } while (ch!='.');
+
+  return 0;
+}
+
+/////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+////////////////// LE BEST //////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+
+
+
+
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
+using namespace std;
+
+int main()
+{   
+
+    fstream file("test.txt", ios::in|ios::out|ios::ate);
+
+    // get size of file
+    file.seekg(0,file.end);
+    int size = file.tellg();
+    file.seekg (0); //on remet le curseur de lecture au début 
+    cout<<size;
+
+    //essayons d'écrire sur la première case du fichier et de remplacer le 'b' par un 'B'
+    file.seekp(0, ios::beg);
+    file<<"B";
+    file.seekp(0,ios::end); //on essaie de se remettre à la fin 
+    file<<" et vous?\n il me semble qu'il fait beau ajd'hui";
+
+    file.close();
+    file.close();
+    return 0;
+}
+
+
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
