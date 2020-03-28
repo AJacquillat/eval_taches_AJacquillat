@@ -1,0 +1,19 @@
+
+
+##id_tache
+#Nom de la tâche  //je laisse volontairement les 
+#descriprion
+#...
+#id_tache-répété-une-fois
+
+##id_tache'
+#Nom de la tâche'
+#descriprion'
+#...
+#id_tache'-répété-une-fois
+
+##id_tache''
+#Nom de la tâche''
+#descriprion''
+#...
+#id_tache''-répété-une-fois
