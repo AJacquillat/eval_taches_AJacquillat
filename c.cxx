@@ -5,7 +5,9 @@
 #include <ctime>
 #include <ratio>
 #include <chrono>
+#include <sstream>
 #include <stdexcept>
+
 using namespace std;
 
 ///explications sur les choix de réponses attendues 
