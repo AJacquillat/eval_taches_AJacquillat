@@ -21,12 +21,11 @@ using namespace std;
 //// structurer le fichier taches.txt dans lequel nous incoprorons les taches 
 
 
-// objectif: créer un fichier de tâches
-// ajouter une tache au fichier & structurer le fichier 
+// objectif: lire un fichier, afficher les taches 
+//
 
 
 ///Pour les commentaires nous créons une fonction insert qui inséère sans écraser...
-
 
 
 char* date_heure()
@@ -37,10 +36,12 @@ char* date_heure()
     return(ctime(&tt));
 }
 
+///fonction qui donne l'id de la tache à créer
+
 int new_id()
 {
     ///La première étape consiste à tester la bonne ouverture du fichier     
-    fstream test_file("test.txt", ios::in| ios::out|ios::ate);
+    fstream test_file("c.txt", ios::in| ios::out|ios::ate);
     test_file.seekp(0,ios::end);    
     int pos_end=test_file.tellp();
 
@@ -48,24 +49,22 @@ int new_id()
     //S'il n'existe pas, nous essayons de le créer
     if (pos_end ==-1) 
     {
-        ofstream ofile("test.txt"); //cela crée le fichier
+        ofstream ofile("c.txt"); //cela crée le fichier
         ofile.close(); //cela ferme l'objet ofile
     }
     test_file.close();
 
 
     /// On recommence tout pour laisser une chance au fichier créé de s'ouvrir 
-    fstream file("test.txt", ios::in| ios::out|ios::ate);
+    fstream file("c.txt", ios::in| ios::out|ios::ate);
     file.seekp(0,ios::end);    
     pos_end=file.tellp();
 
-    //Cas ou le fichier ne peut pas s'ouvrir
+    //Cas ou le fichier ne peut pas s'ouvrir, on relève l'erreur
     if (pos_end ==-1) 
-    {
-        cout<<"probleme dans l'ouverture du fichier, merci de mettre les mains dans le cambouis\nVous créerez alors un fichier test.txt dans le même folder que l'executable\nMerci\n";
-        return(-1);
-    }
-    else if(pos_end<2)//alors le fichier existe mais est vide ou en tout cas n'a pas de tache écrite, l'id est donc 0
+        throw logic_error("probleme dans l'ouverture du fichier, merci de mettre les mains dans le cambouis\nVous créerez alors un fichier c.txt dans le même folder que l'executable\nMerci\n");
+
+    if(pos_end<2)//alors le fichier existe mais est vide ou en tout cas n'a pas de tache écrite, l'id est donc 0
     {
         return(0);
     } 
@@ -106,27 +105,118 @@ int new_id()
     }
 }
 
+//cette fonction sert àn capturer ce qui est écrit par l'utilisateur 
+string saisie()
+{
+        string buffer; //l'élément qui va stocker la saisie
+    std::cout << "Ecrivez # puis pressez retour-arriere pour enregistrer le texte.\n";
+    char ch; //on sépare la selection en différents char pour s'assurer qu'aucun des massages ne conteint le caractère interdit #
+    do {
+        ch = std::cin.get();
+        buffer.append(1,ch); //on ajout la ch à la fin du buffer
+    } while (ch!='#');
+
+    //on supprime juste le # final
+    buffer.pop_back(); 
+
+    return buffer;
+}
+
+/// Fonction pour écrire une tâche 
 void new_task()
 {
-    fstream file("taches.txt", ios::in|ios::out|ios::ate);  //on ouvre un fichier pour écrire et lire dedans 
-        file.seekp(0, ios::end);
-        std::cout << "Ecrivez du texte. Ecrivez # puis pressez retour-arrière pour quitter:\n";
-        char ch; //on sépare la selction en différents char pour tester à chacun si il y a un pb
-        do {
-            ch = std::cin.get();
-            file.put(ch);
-        } while (ch!='#');
+    // Pour éviter d'avoir un problème en cas de crash pendant la défnition d'une tache
+    // et de récupérer un fichier pas aux normes, 
+    // nous stockons toutes les réponses dans un buffer. 
+    //C'est au dernier moment seulement que nous ajouterons ce buffer au fichier texte 
 
-        file.close(); //on ferme le fichier 
+    // Pour comprendre le choix de mise en forme du buffer, se réferer au fichier format_type.txt
+    string buffer;
+
+    ////////// Ecriture de l'id_tache dans le buffer 
+    int id_tache = new_id(); //notons que le fichier est forcément ouvert car nous avons jeté l'exception dans new_id()
+    
+    //assurons nous quand même que l'on arrive à ouvrir le fichier avant de tout faire pour rien
+    fstream file("c.txt", ios::in | ios::out |ios::ate);
+    if(!file.is_open())
+        throw logic_error("Fichier ne s'ouvre pas...");
+    
+    buffer.append("\n\n##");
+    buffer.append(to_string(id_tache));
+    buffer.append("\n");
+    
+
+
+    ////////// Titre de la tache
+    //on dit a l'utilisateur ce qu'il doit faire 
+    cout<<"\n    Saisissez le titre de la nouvelle tache.\n";
+    string buffer_tempo=saisie();
+    //on a maintenant dans buffer_tempo une string qui contient la saisie     
+    // ajoutons dans le gros buffer le contenu du buffer_tempo selon la syntaxe 
+    //précisée dans le fichier format_type.txt
+    buffer=buffer+"#"+buffer_tempo+"\n";
+
+    //vidons maintenant le buffer_tempo
+    buffer_tempo.clear();
+
+
+
+
+    /////////// description de la tache 
+    //on dit a l'utilisateur ce qu'il doit faire 
+    cout<<"\n   Saisissez la description de la nouvelle tache.\n";
+    buffer_tempo=saisie();
+    //on a maintenant dans buffer_tempo une string qui contient la saisie     
+    // ajoutons dans le gros buffer le contenu du buffer_tempo selon la syntaxe 
+    //précisée dans le fichier format_type.txt
+    buffer=buffer+"#"+buffer_tempo.substr(1,buffer.length()-1)+"\n";
+
+    //vidons maintenant le buffer_tempo
+    buffer_tempo.clear();
+
+
+
+
+    ///////////// date de creation de tache
+    buffer=buffer+"#"+date_heure();
+
+
+    //////////// date de fin de tache
+    // l'utilisateur modifie lui même au format habituel 
+    // on peut imaginer automatiser cela plus tard quand avancée passe à 100% ou quand le status passe à D (done)
+    // on met le reste de ces informations liées entre elles à jour, 
+    // en attendant, on réserve de la place pour cette date en remplissant une 'date' fausse
+    buffer=buffer+"#"+"000 000 00 00:00:00 0000"+"\n";
+
+
+
+    ///////// On ajoute un status, par défaut la tache est "open" ('O'), à l'utilisateur de la modifier quand "done" ('D')
+    buffer=buffer+"#"+"O"+"\n";
+
+
+    ////////// On répète une dernière fois l'id_tache, ce qui clos l'espace dédié à la tache
+    buffer.append("#");
+    buffer.append(to_string(id_tache));
+
+
+
+
+    ///////////// on ajoute seulement maintenant les informations au fichier texte 
+    file.seekp(0, ios::end);
+    file<<buffer;
+    file.close(); //on ferme le fichier 
+}
+
+
+int main()
+{       
+    new_task();
 }
 
 void dispatch(string entree)
 {
     ////////// Si l'utilisateur demande à écrire une nouvelle tache 
-    if (entree == "W")
-    {
-        new_task();
-    }
+    if (entree == "W"){new_task();};
 
     ////////// Si l'utilisateur demande à lire une (plusieurs) tache(s)
 
