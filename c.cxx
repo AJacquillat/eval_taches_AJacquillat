@@ -27,7 +27,7 @@ using namespace std;
 
 ///Pour les commentaires nous créons une fonction insert qui inséère sans écraser...
 
-
+//fonction qui donne la date et l'heure actuelles
 char* date_heure()
 {       
     chrono::system_clock::time_point today = chrono::system_clock::now();
@@ -37,7 +37,6 @@ char* date_heure()
 }
 
 ///fonction qui donne l'id de la tache à créer
-
 int new_id()
 {
     ///La première étape consiste à tester la bonne ouverture du fichier     
@@ -207,11 +206,6 @@ void new_task()
     file.close(); //on ferme le fichier 
 }
 
-
-int main()
-{       
-    new_task();
-}
 
 void dispatch(string entree)
 {
