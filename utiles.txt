@@ -15,67 +15,51 @@ ofile.seekp( an_int , éventuellent ios::beg pour partir du début, ios::end; io
 /!\: on insère pas mais on écrase donc pour l'état d'avancement, écrire 000%, 099%, 100% /// pour la priorité 1,2,3 ou H,M,L (high, medium, low)
 
 
+istream& get (streambuf& sb, char delim);  //nous donne tout ce qu'il y a entre le seekg et le char delim (chez nous #)
 
-
-
-/!\ finir par un retour à la ligna fait bugger
 
 le retour à la ligne compte pour deux caractères ('\n')
 L'espace compte pour un caractère 
 
 
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+// Bon pour écrire la DATE et L'HEURE dans un fichier
 
-
-////////////////////////////////////////////////////////
-//  Le code suivant compile & fonctionne, bon exemple //
-////////////////////////////////////////////////////////
 #include <iostream>
 #include <vector>
 #include <fstream>
 #include <string>
+#include <ctime>
+#include <ratio>
+#include <chrono>
 using namespace std;
 
 int main()
-{   
+{       
+       
+    chrono::system_clock::time_point today = chrono::system_clock::now();
+    std::time_t tt;
+    tt = chrono::system_clock::to_time_t ( today );
+    std::cout << "today is: " << ctime(&tt);
 
-    ifstream infile("test.txt", ios::app);
-    ofstream outfile ("test.txt", ios::app);
+    fstream file("test.txt", ios::in | ios::out | ios::ate);
+    file<<ctime(&tt);
 
-
-    infile.seekg(0, ios::beg);
-    while(!infile.eof())
-    {
-        string ligne;
-        getline(infile, ligne);
-        cout<<ligne<<endl;
-    }
-
-    // get size of file
-    infile.seekg(0,infile.end);
-    int size = infile.tellg();
-    infile.seekg (0);
-
-    cout<<size;
-
-    outfile.close();
-    infile.close();
     return 0;
 }
 
-///////////////////////////////////
-Il permet d'écrire dans un fichier préécrit sans tout écraser dès l'ouverture.
-E, revanhce, on ne eput pas réécrire sur les endroits avant k'ouverture..... solution plus tard
-////////////////////////////////////////////////////////
 
 
-
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 //// Eventuellement utile ///////////
 /////////////////////////////////////
 This example writes to a file everything the user types until a dot (.) is typed.
@@ -130,7 +114,6 @@ int main () {
 #include <fstream>
 #include <string>
 using namespace std;
-
 int main()
 {   
 
