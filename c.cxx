@@ -62,7 +62,7 @@ char* date_heure()
 int new_id()
 {
     ///La premiere etape consiste à tester la bonne ouverture du fichier     
-    fstream test_file("t.txt", ios::in| ios::out|ios::ate);
+    fstream test_file("c.txt", ios::in| ios::out|ios::ate);
     test_file.seekp(0,ios::end);    
     int pos_end=test_file.tellp();
 
@@ -70,20 +70,20 @@ int new_id()
     //S'il n'existe pas, nous essayons de le creer
     if (pos_end ==-1) 
     {
-        ofstream ofile("t.txt"); //cela cree le fichier
+        ofstream ofile("c.txt"); //cela cree le fichier
         ofile.close(); //cela ferme l'objet ofile
     }
     test_file.close();
 
 
     /// On recommence tout pour laisser une chance au fichier cree de s'ouvrir 
-    fstream file("t.txt", ios::in| ios::out|ios::ate);
+    fstream file("c.txt", ios::in| ios::out|ios::ate);
     file.seekp(0,ios::end);    
     pos_end=file.tellp();
 
     //Cas ou le fichier ne peut pas s'ouvrir, on releve l'erreur
     if (pos_end ==-1) 
-        throw logic_error("probleme dans l'ouverture du fichier, merci de mettre les mains dans le cambouis\nVous creerez alors un fichier t.txt dans le même folder que l'executable\nMerci\n");
+        throw logic_error("probleme dans l'ouverture du fichier, merci de mettre les mains dans le cambouis\nVous creerez alors un fichier c.txt dans le même folder que l'executable\nMerci\n");
 
     if(pos_end<2)//alors le fichier existe mais est vide ou en tout cas n'a pas de tache ecrite, l'id est donc 0
     {
@@ -133,6 +133,9 @@ int new_id()
 //cette fonction sert àn capturer ce qui est ecrit par l'utilisateur 
 string saisie()
 {
+    
+    std::cin.clear();
+    std::cin.ignore(256,'\n');
     string buffer; //l'element qui va stocker la saisie
     std::cout << "Ecrivez # puis pressez retour-arriere pour enregistrer le texte.\n";
     char ch; //on separe la selection en differents char pour s'assurer qu'aucun des massages ne conteint le caractere interdit #
@@ -151,15 +154,18 @@ string saisie()
 // un entier entre 1 et 3
 string saisie_prio()
 {
+    
+    std::cin.clear();
+    std::cin.ignore(256,'\n');
     int entree;
     cout<<"entrez un entier entre 1 et 3\n";
-    cin >> entree; 
-    while (cin.fail() or entree>3 or entree<1)
+    std::cin >> entree; 
+    while (std::cin.fail() or entree>3 or entree<1)
     {
         cout<<"Entree non conforme\nRecommencez\n";
         std::cin.clear();
         std::cin.ignore(256,'\n');
-        cin >> entree;        
+        std::cin >> entree;        
     };
     string str=int_to_string(entree);
     return str;
@@ -180,7 +186,7 @@ void new_task()
     int id_tache = new_id(); //notons que le fichier est forcement ouvert car nous avons jete l'exception dans new_id()
     
     //assurons nous quand même que l'on arrive à ouvrir le fichier avant de tout faire pour rien
-    fstream file("t.txt", ios::in | ios::out |ios::ate);
+    fstream file("c.txt", ios::in | ios::out |ios::ate);
     if(!file.is_open())
         throw logic_error("Fichier ne s'ouvre pas...");
     
@@ -235,6 +241,9 @@ void new_task()
 
     ///////// On ajoute un status, par defaut la tache est "open" ('O'), à l'utilisateur de la modifier quand "done" ('D')
     buffer=buffer+"#"+"O"+"\n";
+
+    ///////// On ajoute un pourcentage, 000% par defaut 
+    buffer=buffer+"#000%"+"\n";
 
     ///////// On ajoute une priorite
     //on dit a l'utilisateur ce qu'il doit faire 
@@ -294,11 +303,12 @@ void new_task()
 // 4e: date debut
 // 5e: date fin
 // 6e: etat de la tache ('O' open ou 'D' done)
-// 7e: priorite (1<2<3)
-// 8e: Commentaires (separateur &)
-// 9e : sous taches 
-// 10e: repetition du numero de tache 
-// 11e: pour clore la tache 
+// 7e: pourcentage
+// 8e: priorite (1<2<3)
+// 9e: Commentaires (separateur &)
+// 10e : sous taches 
+// 11e: repetition du numero de tache 
+// 12e: pour clore la tache 
 
 ///////// L'idee est de parcourir une fois pour toute la liste des taches, 
 // les positions seront bonnes pdt tt l'exploration dans S (Select)
@@ -310,14 +320,14 @@ void new_task()
 
 vector<vector< int> > sharp_positions()
 {
-    int nb=12; // le nb de # dans la definition d'une unique tache
+    int nb=13; // le nb de # dans la definition d'une unique tache
     int id_lign, id_clmn =0;  
 
     // Nous creons une "matrice"
     vector<vector< int>> matrix;
 
     //Nous ouvrons le fichier dans lequel sont stockees les taches
-    fstream file("t.txt", ios::in |ios::out |ios::ate);    
+    fstream file("c.txt", ios::in |ios::out |ios::ate);    
 
     //Nous determinons la longeur total du fichier     
     file.seekg(0,ios::end);    
@@ -370,7 +380,7 @@ vector<vector< int> > sharp_positions()
 
 void show_section(int position)
 {
-    fstream file("t.txt", ios::in|ios::out|ios::ate);    
+    fstream file("c.txt", ios::in|ios::out|ios::ate);    
     file.seekg(position+1, ios::beg);
 
     string str;
@@ -388,7 +398,7 @@ void show_section(int position)
 // par defaut, supposons que l'on affiche toute la tache 
 void show_one(vector<int> task, string items = {1,2,3,4,6,7,8,9})
 {
-    fstream file("t.txt", ios::out|ios::in|ios::ate);
+    fstream file("c.txt", ios::out|ios::in|ios::ate);
     for (int i:items)
     {
         int sharp_pos= task[i];
@@ -409,7 +419,7 @@ void show_all()
     int compteur =0;
 
     //ouvrons le fichier 
-    fstream file("t.txt", ios::in|ios::out|ios::ate);
+    fstream file("c.txt", ios::in|ios::out|ios::ate);
 
     int pos; //les positions de # auxquelles sont l'information utile
 
@@ -449,9 +459,7 @@ void show_all()
 
 
 
-
-
-// fonction qui effectue une boucle de l'interface show
+////// fonction qui effectue une boucle de l'interface show
 // pour l'instant, dans une vesrions tres primitive 
 // Je passe la matrice à la fonction en passant plutot son adresse 
 // pour ne pas avoir à copier à chaque fois une matrice (meme de taille raisonnable)
@@ -468,9 +476,9 @@ void show_one_step(int entree, vector<vector<int>>* adr_positions )
     else if (entree ==2)
     {
         //tâche à consulter 
-        cout<<"quelle tache voulez vous consulter?(rentrez son id"<<endl;
+        cout<<"quelle tache voulez vous consulter?(rentrez son id)"<<endl;
         int id_tache;
-        cin>>id_tache;
+        std::cin>>id_tache;
 
         //on prend la ligne des adresse 
         vector<int> lign = (*adr_positions)[id_tache];
@@ -478,19 +486,27 @@ void show_one_step(int entree, vector<vector<int>>* adr_positions )
         
         //Elements à consulter 
         cout<<"quels elements voulez vous consulter?"<<endl;
-        cout<<"1er # : numero de la tache\n2e: titre\n3e: description\n4e: date debut\n5e: date fin\n6e: etat de la tache ('O' open ou 'D' done)\n7e: priorite (1<2<3)\n8e: Commentaires (separateur &)\n9e : sous taches\n10e: repetition du numero de tache \n11e: pour clore la tache "<<endl;
+        cout<<"1er # : numero de la tache\n2e: titre\n3e: description\n4e: date debut\n5e: date fin\n6e: etat de la tache ('O' open ou 'D' done)\n7e:Pourcenatage\n8e: priorite (1<2<3)\n9e: Commentaires (separateur &)\n10e : sous taches"<<endl;
         cout<<"entre chaque nombre, pressez entree ou laissez un espace"<<endl;
-        cout<<"quand vous avez terminé la saisie, appuyez sur t puis entree "<<endl;
+        cout<<"quand vous avez termine la saisie, appuyez sur t puis entree "<<endl;
         string str;
         int ch;
-        while((!cin.fail()))
+        while((!std::cin.fail()))
         {
             str.push_back(ch);
-            cin>>ch;
+            std::cin>>ch;
         }
+    
+        std::cin.clear();
+        std::cin.ignore(256,'\n');
         show_one(lign,str);
     }
-    else{cout<<"mauvaise saisie\n";}
+    else
+    {
+        cout<<"\n\nMAUVAISE SAISIE\n\n";
+        std::cin.clear();
+        std::cin.ignore(256,'\n');
+    }
 }
 
 
@@ -510,12 +526,12 @@ void show()
 
     //ecoutons l'utillisateur 
     int entree;
-    cin>> entree;
+    std::cin>> entree;
     while(entree!=0)
     {
-        if(cin.fail())
+        if(std::cin.fail())
         {
-            cout<<"mauvaise saisie";
+            cout<<"\n\nMAUVAISE SAISIE\n\n";
             std::cin.clear();
             std::cin.ignore(256,'\n');
             //on revient donc dans la fonction main et on revient dans l'interface show
@@ -527,9 +543,213 @@ void show()
         }
 
         cout<<endl<<endl<<"Vous etes dans l'espace show.\nQue voulez vous faire?\n0.Revenir au menu principal\n1.Afficher toutes les taches\n2.Afficher une tache\n";
-        cin>> entree;
+        std::cin>> entree;
     }
     
+
+}
+
+
+
+
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+////////////////////// FONCTIONS POUR EDITER ///////////////////////
+////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+
+
+/// fonction qui copie tout le fichier à partir de la position pos
+// dans une string
+// nous nous en servirons dans l'ecriture de commentaires 
+// cette fonction renvoie en premier element de string 
+// l'element à la position pos (et non pos + 1)
+// c'est à dire dans l'utilisation que nous en ferons à '\n'
+
+string end_as_string(int pos)
+{
+    fstream file("c.txt", ios::in|ios::out|ios::ate);
+    file.seekg(pos, ios::beg);
+    string total;
+    string buffer_tempo;
+    while(!file.eof())
+    {
+        getline(file,buffer_tempo);
+        total=total+buffer_tempo+"\n";
+    }
+    return total;
+}
+
+// fonction qui a une position donnee modifie ce que l'on trouve en s'assurant que 
+// la mise en forme n'est pas detruite en faisant un write(remplacement, taille_de_ce_qu'il_y_avait_avant)
+void remplace(int sharp_position, string remplacement)
+{
+    fstream file("c.txt", ios::in|ios::out|ios::ate);
+    file.seekg(sharp_position+1, ios::beg);
+    
+    //on lit la ligne/la section correspondante
+    string str;
+    getline(file, str,'#'); 
+    int size=str.size();
+
+    file.seekp(sharp_position +1, ios::beg);
+
+    file.write(remplacement.c_str(),size-1); // pour convertir la string en char* 
+    // le -1 correspond à la taille prise par le retour à la ligne qui precede le # et que l'on ne veut pas voir disparaitre
+}
+
+
+//0&1er # : numero de la tache
+// 2e: titre
+// 3e: description 
+// 4e: date debut
+// 5e: date fin
+// 6e: etat de la tache ('O' open ou 'D' done)
+// 7e: pourcentage
+// 8e: priorite (1<2<3)
+// 9e: Commentaires (separateur &)
+// 10e : sous taches 
+// 11e: repetition du numero de tache 
+// 12e: pour clore la tache 
+
+// nous recalculons à chaque iteration la position des sharp 
+// car l'insertion de commentaires peut tout decaler 
+void edit_one_step(int entree)
+{
+    
+    fstream file("c.txt", ios::in|ios::out|ios::ate);
+    vector<vector<int>> positions=sharp_positions();
+    if(entree ==1)
+    {
+        //nous nous bornons pour l'instant à afficher toutes les id_taches et leur titre
+        show_all();
+    }
+    else if (entree ==2)
+    {
+        //tâche à consulter 
+        cout<<"quelle tache voulez vous modifier?(rentrez son id)"<<endl;
+        int id_tache;
+        std::cin>>id_tache;
+
+        //on prend la ligne des adresse 
+        vector<int> lign = positions[id_tache];
+
+
+        ///    2.1) Ne rien faire 
+        ///    2.2) Modifier %age (le)
+        ///    2.3) Clore la tache (ie chger date de fin & Pourcentage)
+        ///    2.4) Ajouter un commentaire
+
+        //Elements à modifier 
+        cout<<"  Quel element voulez vous modifier?"<<endl;
+        cout<<"1)Ne rien faire\n2)Modifier pourcentage \n3)Clore tache\n4)Ajouter un commentaire"<<endl;
+        cout<<"Entre chaque nombre, pressez entree ou laissez un espace"<<endl;
+        cout<<"Quand vous avez termine la saisie, appuyez sur entree "<<endl;
+
+        //on nettoie les résidus         
+        std::cin.clear();
+        std::cin.ignore(256,'\n');
+
+        int ch;
+        std::cin>>ch;
+
+        if (ch==1){ }//on ne fait rien
+        else if (ch== 2) 
+        {
+            int sharp_pos=lign[7];
+            cout<<"Entrez le nouveau pourcentage sous la forme xxx\nPour 100% ,x=1,y=z=0; pour 22%, x=0,y=z=2 (ou pas de x)) \n";
+            int n;
+            std::cin>>n;
+            if(std::cin.fail()){cout<<"\nMAUVAISE SAISIE\n\n";}
+            else
+            {
+                if (n==100)
+                {
+                    remplace(sharp_pos,"100%");
+                    remplace(lign[6],"D");
+                    remplace(lign[5],date_heure());
+                }
+                else if(n>9){remplace(sharp_pos,"0"+int_to_string(n)+"%");}//on corrige seulement les deux derniers avec l'int rentre
+                else{remplace(sharp_pos,"00"+int_to_string(n)+"%");}
+            }
+        }
+        else if (ch== 3)
+        {
+            //clore la tache
+            remplace(lign[7],"100%");
+            remplace(lign[6],"D");
+            remplace(lign[5],date_heure());
+        }
+        else if (ch==4)
+        {
+            // nous n'autorisons pour l'instant que l'ajout de commentaire,
+            // pas encore la modification des precedents (ce qui reviendrait
+            // à utiliser la fonction remplace un peu modifiee avec le bon separateur)
+            cout<<"ecrivez votre commentaire"<<endl;
+            string comm=saisie();
+
+            //nous inserons ce commentaire à la fin de la section commentaire (id: 9)
+            // c'est à dire au debut -1 de la section sous taches (id: 10)
+            int pos=lign[10]-1;
+
+            string fin=end_as_string(pos);
+            file.seekp(pos);
+            file<<comm;
+            file<<fin;
+            
+        }
+        else{cout<<"\n\nMAUVAISE SAISIE\n\n";
+            std::cin.clear();
+            std::cin.ignore(256,'\n');}
+    
+        file.close();
+    }
+    else{cout<<"\n\nMAUVAISE SAISIE\n\n";
+            std::cin.clear();
+            std::cin.ignore(256,'\n');}
+
+}
+
+
+void edit()
+{
+    // demander à l'utilisateur ce qu'il veut 
+    /// 0) Revenir au menu principal
+    /// 1)Afficher titre & id de toutes les taches 
+    /// 2) Modifier une tache slectionee par son id
+    ///    2.1) "N": ne rien faire 
+    ///    2.2) Modifier %age
+    ///    2.3) Clore la tache (ie chger date de fin & etat)
+    ///    2.4) Ajouter un commentaire
+    cout<<"Vous etes dans l'espace edit.\nQue voulez vous faire?\n0.Revenir au menu principal\n1.Afficher toutes les taches\n2.Modifier une tache\n";
+    
+
+    // calculons une fois pour toutes la matrice des positions 
+    vector<vector<int>> matrix = sharp_positions();
+
+    //ecoutons l'utillisateur 
+    int entree;
+    std::cin>> entree;
+    while(entree!=0)
+    {
+        if(std::cin.fail())
+        {
+            cout<<"\n\nMAUVAISE SAISIE\n\n";
+            std::cin.clear();
+            std::cin.ignore(256,'\n');
+            //on revient donc dans la fonction main et on revient dans l'interface edit
+            cout<<"Vous etes dans l'espace edit.\nQue voulez vous faire?\n0.Revenir au menu principal\n1.Afficher toutes les taches\n2.Modifier une tache\n";
+        }
+        else
+        {
+            edit_one_step(entree);
+        }
+
+        cout<<endl<<endl<<"Vous etes dans l'espace edit.\nQue voulez vous faire?\n0.Revenir au menu principal\n1.Afficher toutes les taches\n2.Modifier une tache\n";
+        std::cin>> entree;
+    }
+      
 
 }
 
@@ -552,11 +772,19 @@ void dispatch(string entree)
     ////////// Si l'utilisateur demande à modifier une tache 
     // Nous affichons l' id_tache et le nom_tache  de toutes les taches
 
-    // L'utilisateur choisit la tache qu'il veut modifier par son id_tache 
-
-    // On affiche alors l'etat de toutes les composantes  
+    if (entree=="E")
+    {
+        edit();
+    }
+    
+    else
+    {
+        cout<<"entree non conforme\n";
+        
+        std::cin.clear();
+        std::cin.ignore(256,'\n');
+    }
 };
-
 
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////
@@ -567,11 +795,11 @@ void dispatch(string entree)
 
 int main()
 {
-    int on=1; //la variable d'état du système 1: allumé 0: éteint 
+    int on=1; //la variable d'etat du systeme 1: allume 0: eteint 
     while (on==1) 
     {
         string entree;
-        cout<<"tappez la lettre correspondant à l'action désirée : \n Q pour quitter \n W pour écrire une tache \n S pour montrer une(des) tache(s)\n E pour éditer une tache";
+        cout<<"tappez la lettre correspondant à l'action desiree : \n Q pour quitter \n W pour ecrire une tache \n S pour montrer une(des) tache(s)\n E pour editer une tache\n\n";
         cin>>entree;
         if(entree=="Q"){on=0;}
         else{dispatch( entree );}
